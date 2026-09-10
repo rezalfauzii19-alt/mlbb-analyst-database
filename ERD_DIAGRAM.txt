@@ -1,0 +1,494 @@
+-- ============================================
+-- MLBB ANALYST DATABASE - ENTITY RELATIONSHIP DIAGRAM
+-- ============================================
+-- ASCII Art ERD dengan Foreign Key Relationships
+-- ============================================
+
+ERD - MLBB ANALYST DATABASE
+============================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           MASTER DATA SECTION                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+                    ┌──────────────┐
+                    │    TEAMS     │
+                    ├──────────────┤
+                    │ PK: id_team  │
+                    │ - nama_tim   │
+                    │ - logo_url   │
+                    │ - negara     │
+                    └──────────────┘
+                           │
+        ┌──────────────────┼──────────────────┐
+        │                  │                  │
+        ▼                  ▼                  ▼
+    ┌─────────┐   ┌──────────────┐   ┌──────────────┐
+    │ PLAYERS │   │    MATCHES   │   │ DRAFT_TEAMS  │
+    ├─────────┤   ├──────────────┤   └──────────────┘
+    │ id_team*│───│ id_team_1*   │
+    │ role    │   │ id_team_2*   │
+    │ nickname│   │ pemenang     │
+    └─────────┘   │ score_team_1 │
+         │        │ score_team_2 │
+         │        │ match_date   │
+         ▼        └──────────────┘
+    ┌──────────────┐      │
+    │MATCH_PLAYERS │      │
+    ├──────────────┤      │
+    │ id_player*   │      │
+    │ id_match*    │◄─────┘
+    │ id_hero*     │
+    └──────────────┘
+
+    ┌──────────┐         ┌──────────┐
+    │  ROLES   │         │  HEROES  │
+    ├──────────┤         ├──────────┤
+    │id_role(PK)         │id_hero(PK)
+    │nama_role │         │nama_hero │
+    └──────────┘         │tipe      │
+         │               │kesulitan │
+         │               └──────────┘
+         │                    │
+         │    ┌───────────────┼───────────────┐
+         │    │               │               │
+         │    ▼               ▼               ▼
+         └►┌─────────────┐ ┌────────┐ ┌──────────────┐
+          │ HERO_ROLES  │ │ ITEMS  │ │HERO_COUNTERS │
+          ├─────────────┤ ├────────┤ ├──────────────┤
+          │id_hero*     │ │id_item │ │id_hero*      │
+          │id_role*     │ │harga   │ │id_counter*   │
+          └─────────────┘ │icon_url│ │counter_score │
+                          └────────┘ └──────────────┘
+                               │
+                               ▼
+                      ┌──────────────────┐
+                      │ ITEM_COMPONENTS  │
+                      ├──────────────────┤
+                      │ id_item*         │
+                      │ nama_komponen    │
+                      └──────────────────┘
+
+    ┌──────────┐         ┌──────────┐
+    │ PATCHES  │         │ EMBLEMS  │
+    ├──────────┤         ├──────────┤
+    │id_patch  │         │id_emblem │
+    │nama_patch│         │nama_emblem
+    │tanggal   │         │tipe      │
+    └──────────┘         └──────────┘
+         │                    │
+         │                    │
+         │                    └──────┐
+         │                           │
+         ▼                           ▼
+    ┌──────────────┐      ┌──────────────────┐
+    │TOURNAMENTS   │      │  MATCH_PLAYERS   │
+    ├──────────────┤      ├──────────────────┤
+    │id_tournament │      │id_match_player(PK)
+    │nama_tourn    │      │id_emblem*        │
+    │season        │      │lane              │
+    │start_date    │      └──────────────────┘
+    └──────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        MATCH & DRAFT SECTION                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+        ┌──────────────┐
+        │   MATCHES    │
+        ├──────────────┤
+        │ PK: id_match │
+        │ - score      │
+        │ - pemenang   │
+        └──────────────┘
+               │
+        ┌──────┴──────┐
+        │             │
+        ▼             ▼
+    ┌────────┐   ┌────────┐
+    │ DRAFTS │   │ LORDS  │
+    ├────────┤   ├────────┤
+    │id_draft│   │id_lord │
+    │id_team*│   │id_team*│
+    │id_patch│   │captured
+    └────────┘   └────────┘
+         │
+         ▼
+    ┌──────────────┐
+    │DRAFT_ACTIONS │
+    ├──────────────┤
+    │id_draft*     │
+    │id_hero*      │
+    │action_type   │
+    │action_number │
+    └──────────────┘
+
+    ┌────────────────┐       ┌──────────────┐
+    │ MATCH_PLAYERS  │───────│MATCH_STATS   │
+    ├────────────────┤       ├──────────────┤
+    │ id_match*      │       │id_match*     │
+    │ id_player*     │       │kills         │
+    │ id_hero*       │       │deaths        │
+    │ id_emblem*     │       │assists       │
+    └────────────────┘       │golds         │
+                             │dmg_taken     │
+                             └──────────────┘
+
+    ┌───────────────┐   ┌───────────────┐   ┌──────────┐
+    │ OBJECTIVES    │   │   TURRETS     │   │  LORDS   │
+    ├───────────────┤   ├───────────────┤   ├──────────┤
+    │ id_match*     │   │ id_match*     │   │id_match* │
+    │ deskripsi     │   │ team_id*      │   │team_id*  │
+    │ is_contested  │   │ lane          │   │captured  │
+    └───────────────┘   │ destroyed     │   └──────────┘
+                        └───────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                      HERO META & ANALYSIS SECTION                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+        ┌──────────────┐
+        │   HEROES     │
+        ├──────────────┤
+        │ PK: id_hero  │
+        └──────────────┘
+               │
+    ┌──────────┼──────────┬──────────────┐
+    │          │          │              │
+    ▼          ▼          ▼              ▼
+┌─────────┐┌──────────┐┌──────────┐┌──────────────┐
+│ STATS   ││ COUNTERS ││SYNERGIES ││PATCH_CHANGES│
+├─────────┤├──────────┤├──────────┤├──────────────┤
+│id_hero* ││id_hero*  ││id_hero*  ││id_hero*     │
+│id_patch*││id_counter││id_partner││id_patch*    │
+│win_rate ││counter_  ││synergy_  ││description  │
+│pick_rate││score    ││score     ││importance   │
+└─────────┘└──────────┘└──────────┘└──────────────┘
+
+        ┌──────────┐
+        │ PATCHES  │
+        ├──────────┤
+        │ id_patch │
+        │ nama_    │
+        │ patch    │
+        └──────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                     ROTATION & MACRO SECTION                                │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+        ┌──────────────┐
+        │   MATCHES    │
+        ├──────────────┤
+        │ id_match     │
+        └──────────────┘
+               │
+        ┌──────┴──────┐
+        │             │
+        ▼             ▼
+    ┌──────────────┐  ┌──────────────┐
+    │PLAYER_       │  │ ROTATIONS    │
+    │POSITIONS     │  ├──────────────┤
+    ├──────────────┤  │id_match*     │
+    │id_match*     │  │id_player*    │
+    │id_player*    │  │game_time     │
+    │x, y coords   │  │from_area     │
+    │game_time     │  │to_area       │
+    └──────────────┘  │purpose       │
+                      └──────────────┘
+
+        ┌──────────┐
+        │ PLAYERS  │
+        ├──────────┤
+        │id_player │
+        └──────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                   TEAM & PLAYER SCOUTING SECTION                            │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+        ┌──────────┐      ┌──────────┐
+        │  TEAMS   │      │ PLAYERS  │
+        ├──────────┤      ├──────────┤
+        │id_team   │      │id_player │
+        └──────────┘      └──────────┘
+             │                 │
+             │                 │
+             ▼                 ▼
+        ┌──────────────┐  ┌──────────────┐
+        │TEAM_SCOUTING│  │PLAYER_       │
+        ├──────────────┤  │SCOUTING      │
+        │id_team*      │  ├──────────────┤
+        │scout_date    │  │id_player*    │
+        │analyst_id    │  │id_team*      │
+        │notes         │  │weakness      │
+        └──────────────┘  │playstyle     │
+                          │notes         │
+                          └──────────────┘
+
+        ┌──────────────┐
+        │TEAM_PATTERNS │
+        ├──────────────┤
+        │id_team*      │
+        │id_player*    │
+        │pattern_type  │
+        │weakness      │
+        └──────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        VOD & GAME PLAN SECTION                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+        ┌──────────────┐
+        │   MATCHES    │
+        ├──────────────┤
+        │ id_match     │
+        └──────────────┘
+               │
+        ┌──────┴──────┬──────────┐
+        │             │          │
+        ▼             ▼          ▼
+    ┌───────────┐ ┌──────────┐ ┌────────────┐
+    │VOD_       │ │ANALYST_  │ │GAME_PLANS  │
+    │REVIEWS    │ │NOTES     │ ├────────────┤
+    ├───────────┤ ├──────────┤ │id_match*   │
+    │id_vod     │ │id_note   │ │team_id*    │
+    │review_date│ │analyst_id│ │plan_type   │
+    │reviewer_id│ │summary   │ │description │
+    │review_link│ │counter_  │ │notes       │
+    │summary    │ │strategy  │ └────────────┘
+    └───────────┘ └──────────┘       │
+         │                           ▼
+         │                    ┌──────────────────┐
+         ▼                    │GAME_PLAN_        │
+    ┌─────────────┐          │PRIORITIES        │
+    │VOD_EVENTS   │          ├──────────────────┤
+    ├─────────────┤          │id_game_plan*     │
+    │id_vod*      │          │priority_level    │
+    │game_time    │          │early_game_plan   │
+    │event_type   │          │mid_game_plan     │
+    │description  │          │late_game_plan    │
+    │category     │          └──────────────────┘
+    │title        │
+    └─────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         FOREIGN KEY FLOW SUMMARY                            │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+PRIMARY TABLES (Master Data):
+  • TEAMS (id_team)
+  • PLAYERS (id_player)
+  • ROLES (id_role)
+  • HEROES (id_hero)
+  • PATCHES (id_patch)
+  • EMBLEMS (id_emblem)
+  • TOURNAMENTS (id_tournament)
+
+JUNCTION/BRIDGE TABLES (Many-to-Many):
+  • HERO_ROLES
+    └─ id_hero* → heroes(id_hero)
+    └─ id_role* → roles(id_role)
+
+TRANSACTION TABLES (Match Data):
+  • MATCHES (id_match)
+    └─ id_tournament* → tournaments(id_tournament)
+    └─ id_team_1* → teams(id_team)
+    └─ id_team_2* → teams(id_team)
+    └─ id_patch* → patches(id_patch)
+
+  • MATCH_PLAYERS (id_match_player)
+    └─ id_match* → matches(id_match)
+    └─ id_player* → players(id_player)
+    └─ id_hero* → heroes(id_hero)
+    └─ id_team* → teams(id_team)
+    └─ id_emblem* → emblems(id_emblem)
+
+  • MATCH_STATS (id_match_stat)
+    └─ id_match_player* → match_players(id_match_player)
+    └─ id_match* → matches(id_match)
+
+DRAFT TABLES:
+  • DRAFTS (id_draft)
+    └─ id_match* → matches(id_match)
+    └─ id_team* → teams(id_team)
+    └─ id_patch* → patches(id_patch)
+
+  • DRAFT_ACTIONS (id_action)
+    └─ id_draft* → drafts(id_draft)
+    └─ id_hero* → heroes(id_hero)
+    └─ id_team* → teams(id_team)
+
+META ANALYSIS TABLES:
+  • HERO_STATS (id_hero_stat)
+    └─ id_hero* → heroes(id_hero)
+    └─ id_patch* → patches(id_patch)
+
+  • HERO_COUNTERS (id_counter)
+    └─ id_hero* → heroes(id_hero)
+    └─ id_counter_hero* → heroes(id_hero)
+
+  • HERO_SYNERGIES (id_synergy)
+    └─ id_hero* → heroes(id_hero)
+    └─ id_partner_hero* → heroes(id_hero)
+
+  • HERO_PATCH_CHANGES (id_patch_change)
+    └─ id_hero* → heroes(id_hero)
+    └─ id_patch* → patches(id_patch)
+
+ROTATION/MACRO TABLES:
+  • PLAYER_POSITIONS (id_position)
+    └─ id_match* → matches(id_match)
+    └─ id_player* → players(id_player)
+
+  • ROTATIONS (id_rotation)
+    └─ id_match* → matches(id_match)
+    └─ id_player* → players(id_player)
+
+OBJECTIVES TABLES:
+  • OBJECTIVES (id_objective)
+    └─ id_match* → matches(id_match)
+
+  • TURRETS (id_turret)
+    └─ id_match* → matches(id_match)
+    └─ team_id* → teams(id_team)
+
+  • LORDS (id_lord)
+    └─ id_match* → matches(id_match)
+    └─ team_id* → teams(id_team)
+
+SCOUTING TABLES:
+  • TEAM_SCOUTING (id_scouting)
+    └─ id_team* → teams(id_team)
+    └─ id_match* → matches(id_match)
+
+  • PLAYER_SCOUTING (id_player_scout)
+    └─ id_team* → teams(id_team)
+    └─ id_player* → players(id_player)
+
+  • TEAM_PATTERNS (id_pattern)
+    └─ id_team* → teams(id_team)
+    └─ id_player* → players(id_player)
+
+VOD TABLES:
+  • VOD_REVIEWS (id_vod)
+    └─ id_match* → matches(id_match)
+
+  • VOD_EVENTS (id_event)
+    └─ id_vod* → vod_reviews(id_vod)
+
+ANALYSIS TABLES:
+  • ANALYST_NOTES (id_note)
+    └─ id_match* → matches(id_match)
+
+GAME PLAN TABLES:
+  • GAME_PLANS (id_game_plan)
+    └─ id_match* → matches(id_match)
+    └─ team_id* → teams(id_team)
+
+  • GAME_PLAN_PRIORITIES (id_priority)
+    └─ id_game_plan* → game_plans(id_game_plan)
+
+ITEM TABLES:
+  • ITEMS (id_item)
+    └─ id_hero* → heroes(id_hero)
+
+  • ITEM_COMPONENTS (id_component)
+    └─ id_item* → items(id_item)
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                       RELATIONSHIP CARDINALITY                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+TEAMS ──────────────────────┐
+                            │
+                    (1)    (M)
+                    │
+                    ├─────► PLAYERS (One Team has Many Players)
+                    │
+                    ├─────► MATCHES as team_1 (One Team plays Many Matches)
+                    │
+                    ├─────► MATCHES as team_2 (One Team plays Many Matches)
+                    │
+                    ├─────► DRAFT_ACTIONS (One Team drafts Many Heroes)
+                    │
+                    └─────► GAME_PLANS (One Team has Many Game Plans)
+
+HEROES ────────────────────┐
+                           │
+                   (1)    (M)
+                   │
+                   ├─────► HERO_ROLES (One Hero has Many Roles)
+                   │
+                   ├─────► MATCH_PLAYERS (One Hero picked in Many Matches)
+                   │
+                   ├─────► ITEMS (One Hero has recommended Items)
+                   │
+                   ├─────► HERO_COUNTERS (One Hero counters Many Heroes)
+                   │
+                   ├─────► HERO_SYNERGIES (One Hero synergizes with Many Heroes)
+                   │
+                   └─────► HERO_STATS (One Hero has Stats per Patch)
+
+MATCHES ────────────────────┐
+                            │
+                    (1)    (M)
+                    │
+                    ├─────► MATCH_PLAYERS (One Match has 10 Players)
+                    │
+                    ├─────► DRAFTS (One Match has 2 Drafts)
+                    │
+                    ├─────► VOD_REVIEWS (One Match can have Multiple Reviews)
+                    │
+                    ├─────► PLAYER_POSITIONS (One Match has Many Positions)
+                    │
+                    ├─────► ROTATIONS (One Match has Many Rotations)
+                    │
+                    ├─────► GAME_PLANS (One Match has Many Plans)
+                    │
+                    ├─────► OBJECTIVES (One Match has Many Objectives)
+                    │
+                    ├─────► TURRETS (One Match has Many Turrets)
+                    │
+                    ├─────► LORDS (One Match has Many Lords)
+                    │
+                    └─────► ANALYST_NOTES (One Match has Many Notes)
+
+PATCHES ────────────────────┐
+                            │
+                    (1)    (M)
+                    │
+                    ├─────► HERO_STATS (Stats tracked per Patch)
+                    │
+                    └─────► HERO_PATCH_CHANGES (Changes tracked per Patch)
+
+PLAYERS ────────────────────┐
+                            │
+                    (1)    (M)
+                    │
+                    ├─────► MATCH_PLAYERS (One Player in Many Matches)
+                    │
+                    ├─────► PLAYER_POSITIONS (One Player has Many Positions)
+                    │
+                    ├─────► ROTATIONS (One Player has Many Rotations)
+                    │
+                    └─────► PLAYER_SCOUTING (One Player scouted Many Times)
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         LEGEND                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+PK   = Primary Key (Unique identifier untuk setiap record)
+FK   = Foreign Key (Reference ke primary key tabel lain)
+*    = Menandakan Foreign Key relationship
+(1)  = One (satu record)
+(M)  = Many (banyak records)
+──►  = Relationship direction
+
+CASCADE  = Ketika parent dihapus, child juga dihapus
+SET NULL = Ketika parent dihapus, FK di child menjadi NULL
+RESTRICT = Tidak boleh menghapus jika ada referensi dari child
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+END OF ENTITY RELATIONSHIP DIAGRAM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
